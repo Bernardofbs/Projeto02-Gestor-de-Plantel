@@ -1,4 +1,5 @@
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Vaca {
 
@@ -10,6 +11,7 @@ public class Vaca {
     private double producaoMediaDia;
     private String estadoDeSaude;
     private boolean registroAtivoVaca = true;
+    private Object is;
 
     public Vaca(int numBrinco,
                 String raca,
@@ -18,7 +20,7 @@ public class Vaca {
                 LocalDateTime dataUltimoParto,
                 double producaoMediaDia, String estadoDeSaude,
                 boolean registroAtivoVaca
-                ){
+    ) {
 
         this.numBrinco = numBrinco;
         this.raca = raca;
@@ -49,16 +51,48 @@ public class Vaca {
         }
     }
 
-    public void DataNovaInseminacao (){
+    public LocalDateTime DataNovaInseminacao(LocalDateTime dataAtual) {
 
+        LocalDateTime inicioProducaoLeite = dataUltimoParto.plusDays(60);
+        LocalDateTime inicioDescanso = inicioProducaoLeite.plusMonths(10);
+        LocalDateTime inseminacaoLiberada = inicioDescanso.plusMonths(2);
+
+        if (dataAtual.isBefore(inseminacaoLiberada)) {
+
+            DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            String dataFormatada = inseminacaoLiberada.format(formatoBR);
+
+            return LocalDateTime.parse("Não está pronta. Pronta para a inseminação em: " + dataFormatada);
+
+        } else {
+            return dataUltimoParto.plusDays(60).plusMonths(12);
+        }
     }
 
+    public void QuantidadesVacasNoCiclo(LocalDateTime dataAtual) {
 
+        int quantProduzindo = 0;
+        int quantDescanso = 0;
 
+        for (int i = 0; i < quantidadeMatrizesCadastradas; i++) {
 
+            Vaca vacaAtual = vetorMatrizes[i];
 
+            if (vacaAtual.is.registroAtivoVaca()) {
+                String estado = vacaAtual.verificarCicloAtual(dataAtual);
 
+                if (estado.equals("Em descanso")) {
+                    quantDescanso++;
+                } else if (estado.equals("Produzindo leite")) {
+                    quantProduzindo++;
+                }
+            }
+        }
+    }
+}
 
+    public String AtualizarSaude (String estadoDeSaude){
 
 
 }
+
