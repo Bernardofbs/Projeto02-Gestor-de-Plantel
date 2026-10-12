@@ -69,6 +69,18 @@ public class Vaca {
         }
     }
 
+    public void atualizarSaude (String novoEstadoDeSaude) {
+
+        if (novoEstadoDeSaude.equalsIgnoreCase("Saudável") ||
+                novoEstadoDeSaude.equalsIgnoreCase("Em Descanso") ||
+                novoEstadoDeSaude.equalsIgnoreCase("Doente")) {
+
+            this.estadoDeSaude = novoEstadoDeSaude;
+        } else {
+            System.out.print("Estado de saúde inválido. Tente 'Saudável', 'Em Descanso' ou 'Doente'.");
+        }
+    }
+
     public void QuantidadesVacasNoCiclo(LocalDateTime dataAtual) {
 
         int quantProduzindo = 0;
@@ -89,10 +101,10 @@ public class Vaca {
             }
         }
     }
+
+    public void marcarComoFalecido() {
+        this.registroAtivoVaca = false;
+        System.out.println("Registro alterado para Inativo (Falecido).");
+    }
+
 }
-
-    public String AtualizarSaude (String estadoDeSaude){
-
-
-}
-
