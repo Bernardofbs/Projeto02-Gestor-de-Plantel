@@ -1,41 +1,37 @@
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Vaca {
 
     private int numBrinco;
     private String raca;
-    private LocalDateTime dataNascimentoV;
+    private LocalDate dataNascimentoV;
     private int gestacaoSucedida;
-    private LocalDateTime dataUltimoParto;
+    private LocalDate dataUltimoParto;
     private double producaoMediaDia;
     private String estadoDeSaude;
     private boolean registroAtivoVaca = true;
     private Object is;
 
     public Vaca(int numBrinco,
-                String raca,
-                LocalDateTime dataNascimento,
-                int gestacaoSucedida,
-                LocalDateTime dataUltimoParto,
-                double producaoMediaDia, String estadoDeSaude,
-                boolean registroAtivoVaca
+                String raca, LocalDate dataNascimento,
+                int gestacoes, LocalDate dataUltimoParto, double producaoMedia, String estadoDeSaude
     ) {
 
         this.numBrinco = numBrinco;
-        this.raca = raca;
+        this.raca = this.raca;
         this.dataNascimentoV = dataNascimentoV;
         this.gestacaoSucedida = gestacaoSucedida;
-        this.dataUltimoParto = dataUltimoParto;
+        this.dataUltimoParto = this.dataUltimoParto;
         this.producaoMediaDia = producaoMediaDia;
         this.estadoDeSaude = estadoDeSaude;
     }
 
-    public String verificarCicloAtual(LocalDateTime dataAtual) {
+    public String verificarCicloAtual(LocalDate dataAtual) {
 
-        LocalDateTime inicioProducaoLeite = dataUltimoParto.plusDays(60);
-        LocalDateTime inicioDescanso = inicioProducaoLeite.plusMonths(10);
-        LocalDateTime inseminacaoLiberada = inicioDescanso.plusMonths(2);
+        LocalDate inicioProducaoLeite = dataUltimoParto.plusDays(60);
+        LocalDate inicioDescanso = inicioProducaoLeite.plusMonths(10);
+        LocalDate inseminacaoLiberada = inicioDescanso.plusMonths(2);
 
         if (dataAtual.isBefore(inicioProducaoLeite)) {
             return "Amamentando";
@@ -51,18 +47,18 @@ public class Vaca {
         }
     }
 
-    public LocalDateTime DataNovaInseminacao(LocalDateTime dataAtual) {
+    public LocalDate DataNovaInseminacao(LocalDate dataAtual) {
 
-        LocalDateTime inicioProducaoLeite = dataUltimoParto.plusDays(60);
-        LocalDateTime inicioDescanso = inicioProducaoLeite.plusMonths(10);
-        LocalDateTime inseminacaoLiberada = inicioDescanso.plusMonths(2);
+        LocalDate inicioProducaoLeite = dataUltimoParto.plusDays(60);
+        LocalDate inicioDescanso = inicioProducaoLeite.plusMonths(10);
+        LocalDate inseminacaoLiberada = inicioDescanso.plusMonths(2);
 
         if (dataAtual.isBefore(inseminacaoLiberada)) {
 
             DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             String dataFormatada = inseminacaoLiberada.format(formatoBR);
 
-            return LocalDateTime.parse("Não está pronta. Pronta para a inseminação em: " + dataFormatada);
+            return LocalDate.parse("Não está pronta. Pronta para a inseminação em: " + dataFormatada);
 
         } else {
             return dataUltimoParto.plusDays(60).plusMonths(12);
@@ -80,31 +76,12 @@ public class Vaca {
             System.out.print("Estado de saúde inválido. Tente 'Saudável', 'Em Descanso' ou 'Doente'.");
         }
     }
-
-    public void QuantidadesVacasNoCiclo(LocalDateTime dataAtual) {
-
-        int quantProduzindo = 0;
-        int quantDescanso = 0;
-
-        for (int i = 0; i < quantidadeMatrizesCadastradas; i++) {
-
-            Vaca vacaAtual = vetorMatrizes[i];
-
-            if (vacaAtual.is.registroAtivoVaca()) {
-                String estado = vacaAtual.verificarCicloAtual(dataAtual);
-
-                if (estado.equals("Em descanso")) {
-                    quantDescanso++;
-                } else if (estado.equals("Produzindo leite")) {
-                    quantProduzindo++;
-                }
-            }
-        }
-    }
-
     public void marcarComoFalecido() {
         this.registroAtivoVaca = false;
         System.out.println("Registro alterado para Inativo (Falecido).");
     }
 
+    public boolean isregistroAtivoVaca() {
+        return this.registroAtivoVaca;
+    }
 }

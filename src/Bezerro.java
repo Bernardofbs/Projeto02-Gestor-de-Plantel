@@ -1,4 +1,4 @@
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class Bezerro {
@@ -6,7 +6,7 @@ public class Bezerro {
     private int numPai;
     private int numMae;
     private int numProv;
-    private LocalDateTime dataNascimentoB;
+    private LocalDate dataNascimentoB;
     private char sexo;
     private String estadoDeSaude;
     private String[] listaVacinas = new String[20];
@@ -16,7 +16,7 @@ public class Bezerro {
     public Bezerro (int numPai,
                     int numMae,
                     int numProv,
-                    LocalDateTime dataNascimentoB,
+                    LocalDate dataNascimentoB,
                     char sexo,
                     String estadoDeSaude
     ){
@@ -29,9 +29,9 @@ public class Bezerro {
         this.estadoDeSaude = estadoDeSaude;
     }
 
-    public String verificarDesmame(LocalDateTime dataAtual){
+    public String verificarDesmame(LocalDate dataAtual){
 
-    LocalDateTime desmameVerificado = dataNascimentoB.plusDays(60);
+    LocalDate desmameVerificado = dataNascimentoB.plusDays(60);
 
     if (dataAtual.isBefore(desmameVerificado)){
         return "Bezerro ainda está mamando";
@@ -41,13 +41,13 @@ public class Bezerro {
 
     }
 
-    public String liberarVenda(LocalDateTime dataAtual) {
+    public String liberarVenda(LocalDate dataAtual) {
 
         if (sexo == 'F' || sexo == 'f') {
             return "É uma fêmea. Não pode ser vendida.";
         }
 
-        LocalDateTime liberadoParaVenda = dataNascimentoB.plusMonths(6);
+        LocalDate liberadoParaVenda = dataNascimentoB.plusMonths(6);
 
         if (dataAtual.isBefore(liberadoParaVenda)) {
             return "Bezerro é macho, mas não está disponível para venda ainda.";
