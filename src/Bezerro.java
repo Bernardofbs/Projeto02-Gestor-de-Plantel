@@ -84,4 +84,32 @@ public class Bezerro {
         }
     }
 
+    public int getNumPai() {
+        return numPai;
+    }
+
+    public int getNumMae() {
+        return numMae;
+    }
+
+    public int getNumProv() {
+        return numProv;
+    }
+
+    public LocalDate getDataNascimentoB() {
+        return dataNascimentoB;
+    }
+
+    public char getSexo() {
+        return sexo;
+    }
+
+    public String getEstadoDeSaude() {
+        return estadoDeSaude;
+    }
+
+    public String[] getListaVacinas() {
+        return listaVacinas;
+    }
+
 }
