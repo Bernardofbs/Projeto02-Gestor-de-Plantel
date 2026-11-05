@@ -112,4 +112,9 @@ public class Bezerro {
         return listaVacinas;
     }
 
+    //adiciona getter isRegistroAtivoBezerro para controle de remocao logica
+    public boolean isRegistroAtivoBezerro() {
+        return registroAtivoBezerro;
+    }
+
 }
