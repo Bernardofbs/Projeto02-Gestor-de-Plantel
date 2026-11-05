@@ -446,7 +446,7 @@ public class Gerenciador {
         System.out.println("Vacas ordenadas por Saúde e Produção com sucesso");
     }
 
-    // 3. Editar dados armazenados
+    // 3. Editar dados armazenados (Bezerro e Vaca)
     public void editarDadosVaca(int brinco, String novaRaca, LocalDate novaDataNasc, int novasGestacoes, LocalDate novoParto, double novaProducao) {
         Vaca v = buscarVacaPorBrinco(brinco);
 
@@ -459,6 +459,20 @@ public class Gerenciador {
             System.out.println("Os dados da vaca " + brinco + " foram atualizados com sucesso");
         } else {
             System.out.println("Vaca não encontrada ou registro inativo.");
+        }
+    }
+
+    public void editarDadosBezerro(int numProv, int novoNumPai, int novoNumMae, LocalDate novaDataNasc, char novoSexo) {
+        Bezerro b = buscarBezerroPorNumProv(numProv);
+
+        if (b != null && b.isRegistroAtivoBezerro()) {
+            b.setNumPai(novoNumPai);
+            b.setNumMae(novoNumMae);
+            b.setDataNascimentoB(novaDataNasc);
+            b.setSexo(novoSexo);
+            System.out.println("Os dados base do bezerro " + numProv + " foram atualizados com sucesso");
+        } else {
+            System.out.println("Bezerro não encontrado ou registo inativo.");
         }
     }
 
