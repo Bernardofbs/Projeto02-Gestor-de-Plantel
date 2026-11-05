@@ -140,63 +140,60 @@ public class Gerenciador {
 
     public void salvarArquivo(String arquivoPlantel) {
         try {
-            //FileWriter abre o arquivo e escreve nele substituindo o antigo
             FileWriter arquivo = new FileWriter(arquivoPlantel);
             PrintWriter gravador = new PrintWriter(arquivo);
 
-            //Grava as quantidades nas duas primeiras linhas
-            gravador.println(this.vetorVacas.length);
-            gravador.println(this.vetorBezerro.length);
+            // Conta quantos animais estão vivos (Ativos) para o cabeçalho
+            int vacasVivas = 0;
+            for (int i = 0; i < this.vetorVacas.length; i++) {
+                if (this.vetorVacas[i] != null && this.vetorVacas[i].isRegistroAtivoVaca()) {
+                    vacasVivas++;
+                }
+            }
+            int bezerrosVivos = 0;
+            for (int i = 0; i < this.vetorBezerro.length; i++) {
+                if (this.vetorBezerro[i] != null && this.vetorBezerro[i].isRegistroAtivoBezerro()) {
+                    bezerrosVivos++;
+                }
+            }
 
-            //formatador agora faz o caminho inverso LocalDate para String
+            // Grava as quantidades atualizadas nas duas primeiras linhas
+            gravador.println(vacasVivas);
+            gravador.println(bezerrosVivos);
+
             DateTimeFormatter formatadorBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-            //Varre o vetor de Vacas e escreve
+            // Varre o vetor de Vacas e escreve apenas as ativas
             for (int i = 0; i < this.vetorVacas.length; i++) {
                 Vaca v = this.vetorVacas[i];
-
-                //Salva se o indice não estiver vazio
-                if (v != null) {
-                    //Junta os dados colocando ; entre eles.
-                    String linhaVaca = "V;" +
-                            v.getNumBrinco() + ";" +
-                            v.getRaca() + ";" +
+                if (v != null && v.isRegistroAtivoVaca()) {
+                    String linhaVaca = "V;" + v.getNumBrinco() + ";" + v.getRaca() + ";" +
                             v.getDataNascimentoV().format(formatadorBR) + ";" +
                             v.getGestacaoSucedida() + ";" +
                             v.getDataUltimoParto().format(formatadorBR) + ";" +
-                            v.getProducaoMediaDia() + ";" +
-                            v.getEstadoDeSaude();
-
+                            v.getProducaoMediaDia() + ";" + v.getEstadoDeSaude();
                     gravador.println(linhaVaca);
                 }
             }
 
-            //Varre o vetor de Bezerros e escreve
+            // Varre o vetor de Bezerros e escreve apenas os ativos
             for (int i = 0; i < this.vetorBezerro.length; i++) {
                 Bezerro b = this.vetorBezerro[i];
-
-                if (b != null) {
-                    String linhaBezerro = "B;" +
-                            b.getNumPai() + ";" +
-                            b.getNumMae() + ";" +
-                            b.getNumProv() + ";" +
-                            b.getDataNascimentoB().format(formatadorBR) + ";" +
-                            b.getSexo() + ";" +
-                            b.getEstadoDeSaude();
-
+                if (b != null && b.isRegistroAtivoBezerro()) {
+                    String linhaBezerro = "B;" + b.getNumPai() + ";" + b.getNumMae() + ";" +
+                            b.getNumProv() + ";" + b.getDataNascimentoB().format(formatadorBR) + ";" +
+                            b.getSexo() + ";" + b.getEstadoDeSaude();
                     gravador.println(linhaBezerro);
                 }
             }
 
-            gravador.close(); //Salvar o arquivo no disco
-            System.out.println("Arquivo salvo com sucesso");
+            gravador.close();
+            System.out.println("Arquivo salvo com sucesso (Registos inativos foram removidos permanentemente).");
 
         } catch (IOException e) {
             System.out.println("Erro ao tentar salvar o arquivo de texto.");
         }
     }
-
-
     // ************************** MÉTODOS DAS VACAS **************************
 
 
@@ -240,7 +237,7 @@ public class Gerenciador {
         for (int i = 0; i < this.vetorVacas.length; i++) {
             Vaca vacaAtual = this.vetorVacas[i];
 
-            if (vacaAtual != null && vacaAtual.isregistroAtivoVaca()) {
+            if (vacaAtual != null && vacaAtual.isRegistroAtivoVaca()) {
                 String estado = vacaAtual.verificarCicloAtual(dataAtual);
 
                 if (estado.equals("Em descanso")) {
@@ -422,6 +419,46 @@ public class Gerenciador {
             System.out.println("Vacina '" + nomeVacina + "' registrada para o bezerro " + numProv + "");
         } else {
             System.out.println("Bezerro com o número " + numProv + " não encontrado.");
+        }
+    }
+
+    // --- Adicionando os requisitos para o projeto final ---
+
+    // 1. Inserir novos elementos (Aumenta o vetor dinamicamente). Antes só lia do arquivo
+    public void cadastrarNovaVaca(Vaca novaVaca) {
+        this.vetorVacas = Arrays.copyOf(this.vetorVacas, this.vetorVacas.length + 1);
+        this.vetorVacas[this.vetorVacas.length - 1] = novaVaca;
+        System.out.println("Nova Vaca cadastrada com sucesso");
+    }
+
+    public void cadastrarNovoBezerro(Bezerro novoBezerro) {
+        this.vetorBezerro = Arrays.copyOf(this.vetorBezerro, this.vetorBezerro.length + 1);
+        this.vetorBezerro[this.vetorBezerro.length - 1] = novoBezerro;
+        System.out.println("Novo Bezerro cadastrado com sucesso");
+    }
+
+    // 2. Ordenar por dois campos distintos (Saúde e Produção de Leite, fazendo o desempate caso haja campos iguais)
+    public void ordenarVacasPorSaudeEProducao() {
+        Arrays.sort(this.vetorVacas, Comparator.nullsLast(
+                Comparator.comparing(Vaca::getEstadoDeSaude, Comparator.nullsLast(String::compareToIgnoreCase))
+                        .thenComparingDouble(Vaca::getProducaoMediaDia)
+        ));
+        System.out.println("Vacas ordenadas por Saúde e Produção com sucesso");
+    }
+
+    // 3. Editar dados armazenados
+    public void editarDadosVaca(int brinco, String novaRaca, LocalDate novaDataNasc, int novasGestacoes, LocalDate novoParto, double novaProducao) {
+        Vaca v = buscarVacaPorBrinco(brinco);
+
+        if (v != null && v.isRegistroAtivoVaca()) {
+            v.setRaca(novaRaca);
+            v.setDataNascimentoV(novaDataNasc);
+            v.setGestacaoSucedida(novasGestacoes);
+            v.setDataUltimoParto(novoParto);
+            v.setProducaoMediaDia(novaProducao);
+            System.out.println("Os dados da vaca " + brinco + " foram atualizados com sucesso");
+        } else {
+            System.out.println("Vaca não encontrada ou registro inativo.");
         }
     }
 
