@@ -11,7 +11,7 @@ public class Vaca {
     private double producaoMediaDia;
     private String estadoDeSaude;
     private boolean registroAtivoVaca = true;
-    private Object is;
+    //apagar private Object is;
 
     public Vaca(int numBrinco,
                 String raca,
@@ -84,9 +84,9 @@ public class Vaca {
         System.out.println("Registro alterado para Inativo (Falecido).");
     }
 
-    public boolean isregistroAtivoVaca() {
-        return this.registroAtivoVaca;
-    }
+    //apagar método repetido public boolean isregistroAtivoVaca() {
+     //   return this.registroAtivoVaca;
+    //}
 
     public int getNumBrinco() {
         return numBrinco;
@@ -118,5 +118,14 @@ public class Vaca {
 
     public boolean isRegistroAtivoVaca() {
         return registroAtivoVaca;
+    }
+
+    //adiciona setters para permitir edicao de dados
+    public void setRaca(String raca) {
+        this.raca = raca;
+    }
+
+    public void setProducaoMediaDia(double producaoMediaDia) {
+        this.producaoMediaDia = producaoMediaDia;
     }
 }
