@@ -476,4 +476,13 @@ public class Gerenciador {
         }
     }
 
+    //Puxar os animais para a tabela
+    public Vaca[] getVetorVacas() {
+        return vetorVacas;
+    }
+
+    public Bezerro[] getVetorBezerros() {
+        return vetorBezerro;
+    }
+
 }
