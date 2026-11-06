@@ -128,4 +128,16 @@ public class Vaca {
     public void setProducaoMediaDia(double producaoMediaDia) {
         this.producaoMediaDia = producaoMediaDia;
     }
+
+    public void setDataNascimentoV(LocalDate dataNascimentoV) {
+        this.dataNascimentoV = dataNascimentoV;
+    }
+
+    public void setGestacaoSucedida(int gestacaoSucedida) {
+        this.gestacaoSucedida = gestacaoSucedida;
+    }
+
+    public void setDataUltimoParto(LocalDate dataUltimoParto) {
+        this.dataUltimoParto = dataUltimoParto;
+    }
 }

@@ -117,4 +117,21 @@ public class Bezerro {
         return registroAtivoBezerro;
     }
 
+    //adiciona setters para permitir edicao de dados
+    public void setNumPai(int numPai) {
+        this.numPai = numPai;
+    }
+
+    public void setNumMae(int numMae) {
+        this.numMae = numMae;
+    }
+
+    public void setDataNascimentoB(LocalDate dataNascimentoB) {
+        this.dataNascimentoB = dataNascimentoB;
+    }
+
+    public void setSexo(char sexo) {
+        this.sexo = sexo;
+    }
+
 }
