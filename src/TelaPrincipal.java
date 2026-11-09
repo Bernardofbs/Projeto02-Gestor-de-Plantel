@@ -6,13 +6,17 @@ public class TelaPrincipal extends JFrame {
 
     // O IntelliJ criou estas variáveis automaticamente
     private JPanel painelPrincipal;
-    private JTabbedPane tabbedPane1;
+    private JTabbedPane painel1;
     private JPanel abaVacas;
     private JPanel abaBezerros;
     private JTable tabelaV;
     private JTable tabelaB;
     private JScrollPane tabelaVacas;
     private JScrollPane tabelaBezerros;
+    private JPanel painelBotoes;
+    private JButton ordenarPlantelButton;
+    private JButton removerAnimalButton;
+    private JButton salvarESairButton;
 
     // Adicionamos o Gerenciador
     private Gerenciador fazenda;
