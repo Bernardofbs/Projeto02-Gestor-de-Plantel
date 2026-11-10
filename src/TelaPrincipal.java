@@ -1,5 +1,7 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.time.format.DateTimeFormatter;
 
 public class TelaPrincipal extends JFrame {
@@ -36,6 +38,77 @@ public class TelaPrincipal extends JFrame {
         // 3. Preencher as tabelas
         carregarTabelaVacas();
         carregarTabelaBezerros();
+        ordenarPlantelButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // Chama a lógica de dupla ordenação Gerenciador
+                fazenda.ordenarVacasPorSaudeEProducao();
+                fazenda.ordenarBezerrosPorNascimento();
+
+                // Atualiza a interface gráfica para mostrar os dados já ordenados
+                carregarTabelaVacas();
+                carregarTabelaBezerros();
+
+                // Mostra um aviso ao usuario a confirmar a ação
+                JOptionPane.showMessageDialog(null, "Plantel ordenado com sucesso");
+            }
+        });
+        removerAnimalButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int abaSelecionada =  painel1.getSelectedIndex(); // 0 = Vacas, 1 = Bezerros
+
+                if (abaSelecionada == 0) { // Aba das Vacas
+                    int linhaSelecionada = tabelaV.getSelectedRow();
+                    if (linhaSelecionada == -1) {
+                        JOptionPane.showMessageDialog(null, "Por favor, selecione uma vaca na tabela para remover.");
+                        return;
+                    }
+
+                    int numBrinco = Integer.parseInt(tabelaV.getValueAt(linhaSelecionada, 0).toString());
+                    int confirmacao = JOptionPane.showConfirmDialog(null,
+                            "Tem certeza que deseja registrar o óbito/remoção da vaca nº " + numBrinco + "?",
+                            "Confirmar Remoção Lógica", JOptionPane.YES_NO_OPTION);
+
+                    if (confirmacao == JOptionPane.YES_OPTION) {
+                        fazenda.registrarFalecimentoVaca(numBrinco);
+                        carregarTabelaVacas(); // Recarrega a tabela (a vaca inativa desaparecerá)
+                        JOptionPane.showMessageDialog(null, "Registro inativado com sucesso!");
+                    }
+
+                } else if (abaSelecionada == 1) { // Aba dos Bezerros
+                    int linhaSelecionada = tabelaB.getSelectedRow();
+                    if (linhaSelecionada == -1) {
+                        JOptionPane.showMessageDialog(null, "Por favor, selecione um bezerro na tabela para remover.");
+                        return;
+                    }
+
+                    int numProv = Integer.parseInt(tabelaB.getValueAt(linhaSelecionada, 0).toString());
+                    int confirmacao = JOptionPane.showConfirmDialog(null,
+                            "Tem certeza que deseja registrar o óbito/remoção do bezerro prov. " + numProv + "?",
+                            "Confirmar Remoção Lógica", JOptionPane.YES_NO_OPTION);
+
+                    if (confirmacao == JOptionPane.YES_OPTION) {
+                        fazenda.registrarFalecimentoBezerro(numProv);
+                        carregarTabelaBezerros(); // Recarrega a tabela
+                        JOptionPane.showMessageDialog(null, "Registro inativado com sucesso!");
+                    }
+                }
+            }
+        });
+        salvarESairButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                salvarESairButton.addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        fazenda.salvarArquivo("arquivo_plantel.txt");
+                        JOptionPane.showMessageDialog(null, "Alterações salvas com sucesso em arquivo_plantel.txt!");
+                        System.exit(0); // Encerra o programa
+                    }
+                });
+            }
+        });
     }
 
     private void carregarTabelaVacas() {
