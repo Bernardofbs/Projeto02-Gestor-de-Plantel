@@ -1,41 +1,89 @@
-# Relatório Técnico: Sistema para Gestão de Fazendas de Gado Leiteiro (Gestão do Plantel)
+Relatório Técnico: Sistema para Gestão de Fazendas de Gado Leiteiro (Projeto Final - Fase Provisória)
 
-**Nome do Aluno:** Bernardo Ferreira Barbosa Silva  
-**Curso:** Sistemas para Internet  
+Nome do Aluno: Bernardo Ferreira Barbosa Silva
 
-## Descrição do trabalho desenvolvido
+Curso: Sistemas para Internet
 
-O projeto consiste no desenvolvimento de um sistema de Gestão de Fazendas de Gado Leiteiro, construído inteiramente visando aplicar a Programação Orientada a Objetos. O objetivo principal do software é automatizar o controle do plantel, permitindo o registro, a listagem e a organização das informações referentes às vacas matrizes (vacas que produzem leite) e aos seus bezerros. 
+1. Descrição do Trabalho Desenvolvido
 
-Para garantir que as informações do rebanho não sejam perdidas entre as execuções, o sistema implementa a persistência de dados utilizando a leitura e escrita em um arquivo de texto. Através de um menu interativo executado no console, o usuário atua como o administrador da fazenda, podendo consultar relatórios de produção, avaliar o ciclo de lactação das matrizes e visualizar listas ordenadas por diferentes critérios estratégicos, como identificação numérica ou idade. 
+O projeto consiste no desenvolvimento de um Sistema de Gestão de Fazendas de Gado Leiteiro, construído com base nos princípios da Programação Orientada a Objetos (POO). O objetivo principal do software é automatizar o controlo e acompanhamento do plantel, permitindo a gestão de vacas matrizes (produção de leite, histórico reprodutivo e lactação) e dos seus bezerros (histórico de vacinação, desmame e viabilidade de venda).
 
-Além disso, o sistema agora permite a gestão individual de cada animal, possibilitando a atualização de estados de saúde, o registo do histórico de vacinas dos bezerros, a remoção lógica de animais (registo de óbito) e a emissão de relatórios específicos de negócio, como a contagem de bezerros machos prontos para venda ou em espera.
+Na presente fase provisória do Projeto Final, o sistema evoluiu de uma interface de linha de comandos (CLI) para uma Interface Gráfica de Utilizador (GUI) desenvolvida em Java Swing com o IntelliJ UI Designer. Esta transição trouxe melhorias significativas na usabilidade, permitindo:
 
-## Descrição das classes e métodos implementados
+Gestão em Tempo Real via Tabelas (JTable): Visualização segregada por abas (JTabbedPane) para Vacas e Bezerros com suporte a estilização visual dinâmica e alternância de Modo Claro / Modo Escuro.
 
-A arquitetura do software foi dividida em quatro classes principais, separando as entidades de modelo das classes de controle e interface, sem a utilização de banco de dados externo. A lógica central funciona carregando os dados do arquivo físico para a memória RAM, através de vetores, no momento da inicialização, manipulando esses vetores durante a execução e reescrevendo o arquivo físico no encerramento.
+Edição Granular por Célula: Permite selecionar qualquer célula da tabela para modificar atributos específicos (raça, produção, datas, estados de saúde e vacinas) sem a necessidade de reescrever todo o registo.
 
-1. **Classe Vaca e Classe Bezerro:** Entidades de modelo. Aplicam o conceito de encapsulamento, possuindo todos os seus atributos privados. A interação com esses dados ocorre unicamente por meio de métodos de acesso `get`. Elas também abrigam os métodos das regras de negócio exigidas, como a verificação do ciclo de lactação da vaca, a verificação do período de desmame (60 dias), a liberação de venda de bezerros machos a partir do 6º mês e o controlo do histórico de vacinas de cada bezerro.
+Ordenação Otimizada ($O(n \log n)$): Ordenação dupla (Estado de Saúde + Produção de Leite para vacas) e por Data de Nascimento (para bezerros) utilizando o algoritmo TimSort (Arrays.sort com Comparator.nullsLast).
 
-2. **Classe Gerenciador:** Funciona como o motor do sistema, possuindo as estruturas de armazenamento. Ela contém os métodos de ler o arquivo linha por linha e outro para varrer os vetores e regravar o arquivo. Além disso, centraliza os métodos de ordenação (`TimSort`) e atua como um mecanismo de busca: implementa métodos para encontrar animais específicos pelo seu identificador (brinco ou número provisório), permitindo que o Menu atualize a saúde, registe vacinas e óbitos sem manipular os vetores diretamente. Também abriga os algoritmos que geram os relatórios consolidados do rebanho.
+Remoção Lógica e Persistência Expandida: Inativação de animais (registos de óbito) mantendo a integridade dos vetores e sincronização automática com o ficheiro de texto arquivo_plantel.txt.
 
-3. **Classe Menu:** É a interface de interação com o usuário final e a classe principal do programa. Ela instancia o gerenciador, começa a leitura inicial do arquivo e mantém o sistema em execução através de um laço de repetição. Dentro desse laço, uma estrutura de seleção interpreta os comandos numéricos digitados pelo usuário, direcionando para a funcionalidade correspondente no gerenciador e garantindo o salvamento automático ao selecionar a opção de saída.
+2. Descrição das Classes e Arquitetura Implementada
 
-## Descrição da ordem dos dados armazenados nos arquivos
+A arquitetura do software adota a separação entre Entidades de Modelo, Camada de Controlo/Gerenciamento e Camada de Apresentação (GUI):
 
-O armazenamento persistente foi estruturado em um arquivo de texto, utilizando o `;` (ponto e vírgula) como delimitador entre os campos.
+Classe Vaca e Classe Bezerro (Modelo):
 
-O cabeçalho do arquivo é composto por duas linhas numéricas: a primeira indica a capacidade total do vetor de vacas e a segunda a capacidade do vetor de bezerros. Essa estrutura informa ao sistema o tamanho exato da memória que deve ser alocada (tamanho do vetor) antes da leitura dos dados individuais.
+Encapsulam todos os atributos privados com métodos de acesso get e set.
 
-A partir da terceira linha, os registros dos animais são listados sequencialmente. Para diferenciar a leitura, cada linha é iniciada por uma letra de identificação ("V" para Vacas e "B" para Bezerros):
+Vaca: Controla dados de lactação, partos sucedidos, volume diário de leite e verificação dinâmica do ciclo biológico.
 
-*   **Linha de Vaca:** Inicia com "V", seguida pelo número do brinco, raça, data de nascimento, quantidade de gestações bem-sucedidas, data do último parto, volume de produção média diária de leite e estado de saúde atual.
-*   **Linha de Bezerro:** Inicia com "B", seguida pelo número de identificação do pai, número de identificação da mãe, número provisório do bezerro, data de nascimento, sexo e estado de saúde atual.
+Bezerro: Gerencia dados de filiação, sexo, regras de desmame (60 dias), liberação para venda (machos $\ge$ 6 meses) e um vetor dinâmico para registo do histórico de vacinas.
 
-## Erros e acertos durante o desenvolvimento do trabalho
+Classe Gerenciador (Controlo e Persistência):
 
-Durante o processo de desenvolvimento, a manipulação de vetores estáticos e a conversão de tipos de dados apresentaram desafios. Um erro recorrente no início foi a ocorrência de ponteiros nulos ao tentar armazenar objetos no vetor de bezerros, causado pela falta da instanciação do vetor na memória.
+Atua como o motor lógico do sistema. Armazena os animais em vetores (Vaca[] e Bezerro[]) inicializados de forma segura (tamanho zero em vez de null) para prevenção de NullPointerException.
 
-Outro obstáculo superado ocorreu na fase de salvamento, onde dados como raça, produção de leite e datas resultavam em valores `null` ou zerados no arquivo final. Esse erro lógico foi diagnosticado como uma falha na atribuição de variáveis dentro dos construtores das classes Vaca e Bezerro, sendo resolvido com o uso do referenciador interno da classe (`this`).
+Implementa o cadastro dinâmico expandindo arrays via Arrays.copyOf.
 
-Entre os acertos do projeto, destaca-se a conversão das strings de data diretamente para objetos de tempo `LocalDate`, o que evitou cálculos manuais complexos de calendário e facilitou a avaliação do rebanho.
+Realiza a leitura e escrita serializada no ficheiro arquivo_plantel.txt, garantindo o suporte à 8ª coluna (lista de vacinas formatadas por vírgula).
+
+Contém os métodos de ordenação via Comparator, busca por identificador único (brinco ou número provisório) e relatórios de trecho/intervalo.
+
+Classe TelaPrincipal (Interface Gráfica Swing):
+
+Substituiu o antigo Menu.java de consola. Constrói a janela principal (JFrame) utilizando JTabbedPane, JScrollPane e JTable.
+
+Gerencia os ouvintes de eventos (Listeners) para a ordenação do plantel, remoção lógica, alternância de temas em tempo real (aplicarTema) e encerramento com salvamento automático.
+
+3. Descrição do Formato de Armazenamento (arquivo_plantel.txt)
+
+A persistência de dados ocorre em ficheiro de texto plano utilizando o caractere ; (ponto e vírgula) como delimitador de campos.
+
+Cabeçalho
+
+Linha 1: Quantidade total de vacas ativas no plantel.
+
+Linha 2: Quantidade total de bezerros ativos no plantel.
+
+Registos dos Animais
+
+Linha de Vaca (V):
+
+V;numBrinco;raca;dataNascimento;gestacoesSucedidas;dataUltimoParto;producaoMediaDia;estadoDeSaude
+
+Linha de Bezerro (B):
+
+B;numPai;numMae;numProv;dataNascimentoB;sexo;estadoDeSaude;vacinasFormatadas
+
+(O campo vacinasFormatadas armazena as vacinas separadas por vírgula ou o termo "Nenhuma" caso não existam registos).
+
+4. Evolução, Ajustes e Correções Aplicadas
+
+Durante a transição da segunda etapa para a fase provisória do Projeto Final, foram incorporadas melhorias essenciais decorrentes do feedback recebido:
+
+Tratamento de Arquivos Vazios / Inicialização Segura:
+
+Os vetores vetorVacas e vetorBezerro passam a ser instanciados no construtor com tamanho 0, eliminando exceções caso a leitura do ficheiro seja iniciada sem dados prévios.
+
+Listagem por Trecho (Subconjuntos):
+
+Adicionados os métodos listarTrechoVacas(int inicio, int fim) e listarTrechoBezerros(int inicio, int fim) para exibição parcial e parametrizada dos vetores.
+
+Persistência Completa de Vacinas:
+
+A coluna de vacinas foi totalmente integrada na serialização do ficheiro .txt e apresentada na 7ª coluna da JTable de Bezerros na interface gráfica.
+
+Preservação de Dados durante a Ordenação:
+
+A substituição de algoritmos manuais pelo TimSort (Arrays.sort) garantiu a manutenção perfeita das referências em memória, resolvendo o problema de perda de dados alterados antes da ordenação.
