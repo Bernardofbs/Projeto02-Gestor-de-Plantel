@@ -91,6 +91,12 @@
           </component>
         </children>
       </grid>
+      <component id="c93d9" class="javax.swing.JButton" binding="btnAlternarTema">
+        <constraints border-constraint="North"/>
+        <properties>
+          <text value="Modo Escuro"/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

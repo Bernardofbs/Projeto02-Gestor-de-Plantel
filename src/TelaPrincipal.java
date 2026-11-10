@@ -4,6 +4,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.awt.Color;
 
 public class TelaPrincipal extends JFrame {
 
@@ -20,6 +21,8 @@ public class TelaPrincipal extends JFrame {
     private JButton removerAnimalButton;
     private JButton salvarESairButton;
     private JButton editarCampoButton;
+    private JButton btnAlternarTema;
+    private boolean modoEscuro = false; // Controla o estado atual do tema
 
     private Gerenciador fazenda;
 
@@ -249,6 +252,14 @@ public class TelaPrincipal extends JFrame {
                 }
             }
         });
+        btnAlternarTema.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                modoEscuro = !modoEscuro;
+                aplicarTema(modoEscuro);
+                btnAlternarTema.setText(modoEscuro ? "☀️ Modo Claro" : "🌙 Modo Escuro");
+            }
+        });
     }
 
     private void carregarTabelaVacas() {
@@ -300,7 +311,71 @@ public class TelaPrincipal extends JFrame {
         tabelaB.setModel(modelo);
     }
 
+    //Tema Escuro
+    private void aplicarTema(boolean escuro) {
+        // Cores para o tema claro e escuro
+        Color corFundo = escuro ? new Color(33, 37, 43) : new Color(245, 245, 245);
+        Color corTabela = escuro ? new Color(40, 44, 52) : Color.WHITE;
+        Color corTexto = escuro ? Color.WHITE : Color.BLACK;
+        Color corCabecalhoFundo = escuro ? new Color(21, 25, 30) : new Color(225, 225, 225);
+        Color corCabecalhoTexto = escuro ? Color.WHITE : Color.BLACK;
+
+        // 1. Contentores e painéis
+        painelPrincipal.setBackground(corFundo);
+        painelBotoes.setBackground(corFundo);
+        abaVacas.setBackground(corFundo);
+        abaBezerros.setBackground(corFundo);
+        painel1.setBackground(corFundo);
+
+        // 2. Viewports (fundo das tabelas)
+        tabelaVacas.setBackground(corTabela);
+        tabelaVacas.getViewport().setBackground(corTabela);
+        tabelaBezerros.setBackground(corTabela);
+        tabelaBezerros.getViewport().setBackground(corTabela);
+
+        // 3. Linhas da tabela
+        tabelaV.setBackground(corTabela);
+        tabelaV.setForeground(corTexto);
+        tabelaB.setBackground(corTabela);
+        tabelaB.setForeground(corTexto);
+
+        // 4. Renderizador personalizado para forçar a cor e o fundo do cabeçalho
+        javax.swing.table.DefaultTableCellRenderer renderizadorCabecalho = new javax.swing.table.DefaultTableCellRenderer() {
+            @Override
+            public java.awt.Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+                super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setBackground(corCabecalhoFundo);
+                setForeground(corCabecalhoTexto);
+                setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 12));
+                setBorder(BorderFactory.createMatteBorder(0, 0, 1, 1, escuro ? new Color(60, 64, 72) : Color.LIGHT_GRAY));
+                return this;
+            }
+        };
+
+        // Aplica o renderizador em cada coluna das duas tabelas
+        for (int i = 0; i < tabelaV.getColumnCount(); i++) {
+            tabelaV.getColumnModel().getColumn(i).setHeaderRenderer(renderizadorCabecalho);
+        }
+        for (int i = 0; i < tabelaB.getColumnCount(); i++) {
+            tabelaB.getColumnModel().getColumn(i).setHeaderRenderer(renderizadorCabecalho);
+        }
+
+        repaint();
+    }
+
+    //Main com opções novas de customização
     public static void main(String[] args) {
+        try {
+            // Opção 1: Deixa a interface idêntica às janelas nativas do sistema operativo
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
+            // Opção 2 (Alternativa): Tema Nimbus (Moderno e arredondado nativo do Swing)
+            // UIManager.setLookAndFeel("javax.swing.plaf.nimbus.NimbusLookAndFeel");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         SwingUtilities.invokeLater(() -> {
             TelaPrincipal tela = new TelaPrincipal();
             tela.setVisible(true);
