@@ -15,8 +15,6 @@ import java.util.Comparator;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import java.util.Arrays;
-
 public class Gerenciador {
 
     // Correção Juliana 1. Inicializar os vetores como 0 (não-nulos) no construtor para evitar NullPointerException
@@ -58,38 +56,33 @@ public class Gerenciador {
             File arquivo = new File(arquivoPlantel);
             //Aponta o caminho do arquivo e aponta para a variável "arquivoPlantel"
 
+            if (!arquivo.exists()) {
+                System.out.println("Arquivo não encontrado. Vetores serão iniciados vazios.");
+                return;
+            }
+
             // Abre e começa a ler o arquivo
             Scanner ler = new Scanner(arquivo);
 
             // Passou até aqui, ent o arquivo existe
 
-            //Ler a primeira linha e descobrir o tamanho dos vetores
-            if (ler.hasNextInt()) {
-                // Lê a primeira linha: quantidade de vacas
-                int numVacas = ler.nextInt();
-                ler.nextLine(); // Consome a quebra de linha
-                this.vetorVacas = new Vaca[numVacas];
+            // Reinicia os vetores para garantir que não haja sujeira anterior
+            this.vetorVacas = new Vaca[0];
+            this.vetorBezerro = new Bezerro[0];
 
-                // Lê a segunda linha: quantidade de bezerros
-                int numBezerros = ler.nextInt();
-                ler.nextLine(); // Consome a quebra de linha
-                this.vetorBezerro = new Bezerro[numBezerros];
-            }
-
-            //while para ler o resto do arquivo linha por linha, usando split para separar
+            // Consome as duas primeiras linhas do cabeçalho (quantidades) se existirem
+            if (ler.hasNextLine()) ler.nextLine();
+            if (ler.hasNextLine()) ler.nextLine();
 
             DateTimeFormatter formatadorBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             //Formatar as datas para o formato brasileiro
-
-            // Variável para controlar em qual indice do vetor vai ser guardada a vaca atual
-            int indiceVaca = 0;
-            int indiceBezerro = 0;
 
             // Enquanto existir uma próxima linha no arquivo, o laço continua
             while (ler.hasNextLine()) {
 
                 //Puxa a linha inteira do txt
-                String linha = ler.nextLine();
+                String linha = ler.nextLine().trim();
+                if (linha.isEmpty()) continue;
 
                 // Corta o texto onde tem o ";" e cria um vetor com as partes do txt separadas
                 String[] partes = linha.split(";");
@@ -97,7 +90,7 @@ public class Gerenciador {
                 String tipoAnimal = partes[0];
                 // Pega o "V" ou o "B" da primeira posição
 
-                if (tipoAnimal.equals("V")) {
+                if (tipoAnimal.equalsIgnoreCase("V")) {
 
                     //numBrinco para int
                     int numBrinco = Integer.parseInt(partes[1]);
@@ -123,11 +116,10 @@ public class Gerenciador {
 
                     Vaca novaVaca = new Vaca(numBrinco, raca, dataNascimento, gestacoes, dataUltimoParto, producaoMedia, estadoDeSaude);
 
-                    //Colocar o objeto tipo Vaca com os atributos preenchidos em um indice do Vetor e depois avançar para o proximo
-                    this.vetorVacas[indiceVaca] = novaVaca;
-                    indiceVaca++;
+                    // Cadastra no vetor expandindo dinamicamente
+                    cadastrarNovaVaca(novaVaca);
 
-                } else if (tipoAnimal.equals("B")) {
+                } else if (tipoAnimal.equalsIgnoreCase("B")) {
 
                     // numPai para int
                     int numPai = Integer.parseInt(partes[1]);
@@ -151,16 +143,28 @@ public class Gerenciador {
                     // Criação do objeto
                     Bezerro novoBezerro = new Bezerro(numPai, numMae, numProv, dataNascimentoB, sexo, estadoDeSaude);
 
-                    // Colocar o objeto tipo Bezerro com os atributos preenchidos em um indice do Vetor e depois avançar para o proximo
-                    this.vetorBezerro[indiceBezerro] = novoBezerro;
-                    indiceBezerro++;
+                    // Carrega as vacinas se existirem na 8ª coluna (índice 7)
+                    if (partes.length > 7 && !partes[7].equalsIgnoreCase("Nenhuma") && !partes[7].trim().isEmpty()) {
+                        String[] vacinas = partes[7].split(",");
+                        for (String vac : vacinas) {
+                            novoBezerro.adicionarVacina(vac.trim());
+                        }
+                    }
+
+                    // Cadastra no vetor expandindo dinamicamente
+                    cadastrarNovoBezerro(novoBezerro);
                 }
 
             }
 
             ler.close();
+            System.out.println("Arquivo lido");
+
         } catch (FileNotFoundException e) {
-            System.out.println("Arquivo não encontrado.Vetores serão iniciados vazios.");
+            System.out.println("Arquivo não encontrado. Vetores serão iniciados vazios.");
+        } catch (Exception e) {
+            System.out.println("Erro ao ler o arquivo: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -208,7 +212,7 @@ public class Gerenciador {
                 if (b != null && b.isRegistroAtivoBezerro()) {
                     String linhaBezerro = "B;" + b.getNumPai() + ";" + b.getNumMae() + ";" +
                             b.getNumProv() + ";" + b.getDataNascimentoB().format(formatadorBR) + ";" +
-                            b.getSexo() + ";" + b.getEstadoDeSaude();
+                            b.getSexo() + ";" + b.getEstadoDeSaude() + ";" + b.getVacinasFormatadas();
                     gravador.println(linhaBezerro);
                 }
             }
@@ -220,6 +224,7 @@ public class Gerenciador {
             System.out.println("Erro ao tentar salvar o arquivo de texto.");
         }
     }
+
     // ************************** MÉTODOS DAS VACAS **************************
 
 
@@ -261,18 +266,6 @@ public class Gerenciador {
                         " | Saúde: " + vetorVacas[i].getEstadoDeSaude());
             }
         }
-    }
-
-    public void ordenarVacasPorBrinco() {
-        //Ordena pelo número do brinco e leva indices vazios para o final
-        Arrays.sort(this.vetorVacas, Comparator.nullsLast(Comparator.comparingInt(Vaca::getNumBrinco)));
-        System.out.println("Vacas ordenadas por Número do Brinco com sucesso");
-    }
-
-    public void ordenarVacasPorProducao() {
-        //Ordena pela produção de leite
-        Arrays.sort(this.vetorVacas, Comparator.nullsLast(Comparator.comparingDouble(Vaca::getProducaoMediaDia)));
-        System.out.println("Vacas ordenadas por Produção de Leite com sucesso");
     }
 
     public void QuantidadesVacasNoCiclo(LocalDate dataAtual) {
@@ -394,15 +387,10 @@ public class Gerenciador {
         }
     }
 
-    public void ordenarBezerrosPorNumeroProvisorio() {
-        //Compara usando números int
-        Arrays.sort(this.vetorBezerro, Comparator.nullsLast(Comparator.comparingInt(Bezerro::getNumProv)));
-        System.out.println("Bezerros ordenados por Número Provisório com sucesso");
-    }
-
     public void ordenarBezerrosPorNascimento() {
-        //LocalDate é um objeto, uso apenas.comparing() sem o Int no final
-        Arrays.sort(this.vetorBezerro, Comparator.nullsLast(Comparator.comparing(Bezerro::getDataNascimentoB)));
+        Arrays.sort(this.vetorBezerro, Comparator.nullsLast(
+                Comparator.comparing(Bezerro::getDataNascimentoB, Comparator.nullsLast(Comparator.naturalOrder()))
+        ));
         System.out.println("Bezerros ordenados por Data de Nascimento com sucesso");
     }
 
@@ -485,7 +473,7 @@ public class Gerenciador {
         Bezerro b = buscarBezerroPorNumProv(numProv);
         if (b != null) {
             b.adicionarVacina(nomeVacina);
-            System.out.println("Vacina '" + nomeVacina + "' registrada para o bezerro " + numProv + "");
+            System.out.println("Vacina '" + nomeVacina + "' registrada para o bezerro " + numProv);
         } else {
             System.out.println("Bezerro com o número " + numProv + " não encontrado.");
         }

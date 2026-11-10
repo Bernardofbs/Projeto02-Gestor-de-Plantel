@@ -13,13 +13,13 @@ public class Bezerro {
     private int contadorVacinas = 0;
     private boolean registroAtivoBezerro = true;
 
-    public Bezerro (int numPai,
-                    int numMae,
-                    int numProv,
-                    LocalDate dataNascimentoB,
-                    char sexo,
-                    String estadoDeSaude
-    ){
+    public Bezerro(int numPai,
+                   int numMae,
+                   int numProv,
+                   LocalDate dataNascimentoB,
+                   char sexo,
+                   String estadoDeSaude
+    ) {
 
         this.numPai = numPai;
         this.numMae = numMae;
@@ -27,17 +27,22 @@ public class Bezerro {
         this.dataNascimentoB = dataNascimentoB;
         this.sexo = sexo;
         this.estadoDeSaude = estadoDeSaude;
+        // Garante que os construtores inicializem a lista de vacinas caso venha nula:
+        if (this.listaVacinas == null) {
+            this.listaVacinas = new String[10];
+            this.contadorVacinas = 0;
+        }
     }
 
-    public String verificarDesmame(LocalDate dataAtual){
+    public String verificarDesmame(LocalDate dataAtual) {
 
-    LocalDate desmameVerificado = dataNascimentoB.plusDays(60);
+        LocalDate desmameVerificado = dataNascimentoB.plusDays(60);
 
-    if (dataAtual.isBefore(desmameVerificado)){
-        return "Bezerro ainda está mamando";
-    } else {
-        return "Bezerro está pronto para desmamar";
-    }
+        if (dataAtual.isBefore(desmameVerificado)) {
+            return "Bezerro ainda está mamando";
+        } else {
+            return "Bezerro está pronto para desmamar";
+        }
 
     }
 
@@ -55,7 +60,8 @@ public class Bezerro {
             return "Bezerro é macho e pode ser vendido.";
         }
     }
-    public void atualizarSaude (String novoEstadoDeSaude) {
+
+    public void atualizarSaude(String novoEstadoDeSaude) {
 
         if (novoEstadoDeSaude.equalsIgnoreCase("Saudável") ||
                 novoEstadoDeSaude.equalsIgnoreCase("Doente")) {
@@ -118,6 +124,11 @@ public class Bezerro {
     }
 
     //adiciona setters para permitir edicao de dados
+
+    public void setNumProv(int numProv) {
+        this.numProv = numProv;
+    }
+
     public void setNumPai(int numPai) {
         this.numPai = numPai;
     }
@@ -133,6 +144,8 @@ public class Bezerro {
     public void setSexo(char sexo) {
         this.sexo = sexo;
     }
+
+    public void setEstadoDeSaude(String estadoDeSaude) { this.estadoDeSaude = estadoDeSaude; }
 
 
     //Correção 1: Adicionar método para editar a lista de vacinas

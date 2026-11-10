@@ -2,11 +2,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class TelaPrincipal extends JFrame {
 
-    // O IntelliJ criou estas variáveis automaticamente
     private JPanel painelPrincipal;
     private JTabbedPane painel1;
     private JPanel abaVacas;
@@ -19,8 +19,8 @@ public class TelaPrincipal extends JFrame {
     private JButton ordenarPlantelButton;
     private JButton removerAnimalButton;
     private JButton salvarESairButton;
+    private JButton editarCampoButton;
 
-    // Adicionamos o Gerenciador
     private Gerenciador fazenda;
 
     public TelaPrincipal() {
@@ -28,35 +28,36 @@ public class TelaPrincipal extends JFrame {
         setContentPane(painelPrincipal);
         setTitle("Sistema de Gestão de Plantel");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(900, 600); // Tamanho da janela
-        setLocationRelativeTo(null); // Centra a janela no ecrã
+        setSize(900, 600);
+        setLocationRelativeTo(null);
 
         // 2. Inicializar o sistema lógico e ler ficheiro
         fazenda = new Gerenciador();
-        fazenda.lerArquivo("arquivo_plantel.txt"); // Garante que o .txt está na pasta raiz do projeto
+        fazenda.lerArquivo("arquivo_plantel.txt");
 
-        // 3. Preencher as tabelas
+        // 3. Preencher as tabelas na inicialização
         carregarTabelaVacas();
         carregarTabelaBezerros();
+
+        // Listener Ordenar Plantel
         ordenarPlantelButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                // Chama a lógica de dupla ordenação Gerenciador
                 fazenda.ordenarVacasPorSaudeEProducao();
                 fazenda.ordenarBezerrosPorNascimento();
 
-                // Atualiza a interface gráfica para mostrar os dados já ordenados
                 carregarTabelaVacas();
                 carregarTabelaBezerros();
 
-                // Mostra um aviso ao usuario a confirmar a ação
-                JOptionPane.showMessageDialog(null, "Plantel ordenado com sucesso");
+                JOptionPane.showMessageDialog(null, "Plantel ordenado com sucesso!");
             }
         });
+
+        // Listener Remover Animal
         removerAnimalButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                int abaSelecionada =  painel1.getSelectedIndex(); // 0 = Vacas, 1 = Bezerros
+                int abaSelecionada = painel1.getSelectedIndex(); // 0 = Vacas, 1 = Bezerros
 
                 if (abaSelecionada == 0) { // Aba das Vacas
                     int linhaSelecionada = tabelaV.getSelectedRow();
@@ -72,7 +73,7 @@ public class TelaPrincipal extends JFrame {
 
                     if (confirmacao == JOptionPane.YES_OPTION) {
                         fazenda.registrarFalecimentoVaca(numBrinco);
-                        carregarTabelaVacas(); // Recarrega a tabela (a vaca inativa desaparecerá)
+                        carregarTabelaVacas();
                         JOptionPane.showMessageDialog(null, "Registro inativado com sucesso!");
                     }
 
@@ -90,36 +91,171 @@ public class TelaPrincipal extends JFrame {
 
                     if (confirmacao == JOptionPane.YES_OPTION) {
                         fazenda.registrarFalecimentoBezerro(numProv);
-                        carregarTabelaBezerros(); // Recarrega a tabela
+                        carregarTabelaBezerros();
                         JOptionPane.showMessageDialog(null, "Registro inativado com sucesso!");
                     }
                 }
             }
         });
+
+        // Listener Salvar e Sair
         salvarESairButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                salvarESairButton.addActionListener(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        fazenda.salvarArquivo("arquivo_plantel.txt");
-                        JOptionPane.showMessageDialog(null, "Alterações salvas com sucesso em arquivo_plantel.txt!");
-                        System.exit(0); // Encerra o programa
+                fazenda.salvarArquivo("arquivo_plantel.txt");
+                JOptionPane.showMessageDialog(null, "Alterações salvas com sucesso em arquivo_plantel.txt!");
+                System.exit(0);
+            }
+        });
+
+        // Edita exatamente a coluna que o utilizador selecionou na tabela
+        editarCampoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int abaSelecionada = painel1.getSelectedIndex(); // 0 = Vacas, 1 = Bezerros
+                DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+                if (abaSelecionada == 0) { // Aba das Vacas
+                    int linha = tabelaV.getSelectedRow();
+                    int coluna = tabelaV.getSelectedColumn();
+
+                    if (linha == -1 || coluna == -1) {
+                        JOptionPane.showMessageDialog(null, "Por favor, clique numa célula da tabela de Vacas para escolher o campo que deseja editar.");
+                        return;
                     }
-                });
+
+                    int numBrinco = Integer.parseInt(tabelaV.getValueAt(linha, 0).toString());
+                    Vaca v = fazenda.buscarVacaPorBrinco(numBrinco);
+
+                    if (v != null) {
+                        try {
+                            switch (coluna) {
+                                case 0: // Brinco
+                                    String novoBrincoStr = JOptionPane.showInputDialog(null, "Novo Número de Brinco:", v.getNumBrinco());
+                                    if (novoBrincoStr != null && !novoBrincoStr.trim().isEmpty()) {
+                                        v.setNumBrinco(Integer.parseInt(novoBrincoStr.trim()));
+                                    }
+                                    break;
+                                case 1: // Raça
+                                    String novaRaca = JOptionPane.showInputDialog(null, "Nova Raça:", v.getRaca());
+                                    if (novaRaca != null && !novaRaca.trim().isEmpty()) {
+                                        v.setRaca(novaRaca.trim());
+                                    }
+                                    break;
+                                case 2: // Nascimento
+                                    String dataNascStr = JOptionPane.showInputDialog(null, "Nova Data de Nascimento (dd/MM/yyyy):", v.getDataNascimentoV().format(formatoBR));
+                                    if (dataNascStr != null && !dataNascStr.trim().isEmpty()) {
+                                        v.setDataNascimentoV(LocalDate.parse(dataNascStr.trim(), formatoBR));
+                                    }
+                                    break;
+                                case 3: // Gestações
+                                    String gestStr = JOptionPane.showInputDialog(null, "Número de Gestações:", v.getGestacaoSucedida());
+                                    if (gestStr != null && !gestStr.trim().isEmpty()) {
+                                        v.setGestacaoSucedida(Integer.parseInt(gestStr.trim()));
+                                    }
+                                    break;
+                                case 4: // Último Parto
+                                    String dataPartoStr = JOptionPane.showInputDialog(null, "Nova Data do Último Parto (dd/MM/yyyy):", v.getDataUltimoParto().format(formatoBR));
+                                    if (dataPartoStr != null && !dataPartoStr.trim().isEmpty()) {
+                                        v.setDataUltimoParto(LocalDate.parse(dataPartoStr.trim(), formatoBR));
+                                    }
+                                    break;
+                                case 5: // Produção
+                                    String prodStr = JOptionPane.showInputDialog(null, "Nova Produção Média (L/dia):", v.getProducaoMediaDia());
+                                    if (prodStr != null && !prodStr.trim().isEmpty()) {
+                                        v.setProducaoMediaDia(Double.parseDouble(prodStr.trim()));
+                                    }
+                                    break;
+                                case 6: // Saúde
+                                    String novaSaude = JOptionPane.showInputDialog(null, "Novo Estado de Saúde:", v.getEstadoDeSaude());
+                                    if (novaSaude != null && !novaSaude.trim().isEmpty()) {
+                                        v.setEstadoDeSaude(novaSaude.trim());
+                                    }
+                                    break;
+                            }
+                            carregarTabelaVacas();
+                            JOptionPane.showMessageDialog(null, "Campo da vaca atualizado com sucesso!");
+
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(null, "Erro ao atualizar campo: Formato do valor digitado é inválido.");
+                        }
+                    }
+
+                } else if (abaSelecionada == 1) { // Aba dos Bezerros
+                    int linha = tabelaB.getSelectedRow();
+                    int coluna = tabelaB.getSelectedColumn();
+
+                    if (linha == -1 || coluna == -1) {
+                        JOptionPane.showMessageDialog(null, "Por favor, clique numa célula da tabela de Bezerros para escolher o campo que deseja editar.");
+                        return;
+                    }
+
+                    int numProv = Integer.parseInt(tabelaB.getValueAt(linha, 0).toString());
+                    Bezerro b = fazenda.buscarBezerroPorNumProv(numProv);
+
+                    if (b != null) {
+                        try {
+                            switch (coluna) {
+                                case 0: // Nº Prov
+                                    String novoProvStr = JOptionPane.showInputDialog(null, "Novo Número Provisório:", b.getNumProv());
+                                    if (novoProvStr != null && !novoProvStr.trim().isEmpty()) {
+                                        b.setNumProv(Integer.parseInt(novoProvStr.trim()));
+                                    }
+                                    break;
+                                case 1: // Mãe
+                                    String novaMaeStr = JOptionPane.showInputDialog(null, "Novo Brinco da Mãe:", b.getNumMae());
+                                    if (novaMaeStr != null && !novaMaeStr.trim().isEmpty()) {
+                                        b.setNumMae(Integer.parseInt(novaMaeStr.trim()));
+                                    }
+                                    break;
+                                case 2: // Pai
+                                    String novoPaiStr = JOptionPane.showInputDialog(null, "Novo Brinco do Pai:", b.getNumPai());
+                                    if (novoPaiStr != null && !novoPaiStr.trim().isEmpty()) {
+                                        b.setNumPai(Integer.parseInt(novoPaiStr.trim()));
+                                    }
+                                    break;
+                                case 3: // Nascimento
+                                    String dataNascStr = JOptionPane.showInputDialog(null, "Nova Data de Nascimento (dd/MM/yyyy):", b.getDataNascimentoB().format(formatoBR));
+                                    if (dataNascStr != null && !dataNascStr.trim().isEmpty()) {
+                                        b.setDataNascimentoB(LocalDate.parse(dataNascStr.trim(), formatoBR));
+                                    }
+                                    break;
+                                case 4: // Sexo
+                                    String sexoStr = JOptionPane.showInputDialog(null, "Novo Sexo (M/F):", b.getSexo());
+                                    if (sexoStr != null && !sexoStr.trim().isEmpty()) {
+                                        b.setSexo(sexoStr.trim().toUpperCase().charAt(0));
+                                    }
+                                    break;
+                                case 5: // Saúde
+                                    String novaSaude = JOptionPane.showInputDialog(null, "Novo Estado de Saúde:", b.getEstadoDeSaude());
+                                    if (novaSaude != null && !novaSaude.trim().isEmpty()) {
+                                        b.setEstadoDeSaude(novaSaude.trim());
+                                    }
+                                    break;
+                                case 6: // Vacinas
+                                    String novaVacina = JOptionPane.showInputDialog(null, "Adicionar Nova Vacina ao Bezerro:");
+                                    if (novaVacina != null && !novaVacina.trim().isEmpty()) {
+                                        b.adicionarVacina(novaVacina.trim());
+                                    }
+                                    break;
+                            }
+                            carregarTabelaBezerros();
+                            JOptionPane.showMessageDialog(null, "Campo do bezerro atualizado");
+
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(null, "Erro ao atualizar campo: Formato do valor digitado é inválido.");
+                        }
+                    }
+                }
             }
         });
     }
 
     private void carregarTabelaVacas() {
-        // Define o nome das colunas
         String[] colunas = {"Brinco", "Raça", "Nasc.", "Gestações", "Últ. Parto", "Produção", "Saúde"};
-
-        // O DefaultTableModel é o tradutor de dados para a JTable visual
         DefaultTableModel modelo = new DefaultTableModel(colunas, 0);
         DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        // Percorre o vetor de vacas e preenche as linhas da tabela
         for (Vaca v : fazenda.getVetorVacas()) {
             if (v != null && v.isRegistroAtivoVaca()) {
                 Object[] linha = {
@@ -131,22 +267,22 @@ public class TelaPrincipal extends JFrame {
                         v.getProducaoMediaDia(),
                         v.getEstadoDeSaude()
                 };
-                modelo.addRow(linha); // Adiciona a linha ao modelo
+                modelo.addRow(linha);
             }
         }
-
-        // Aplica os dados à tabela visual
         tabelaV.setModel(modelo);
     }
 
     private void carregarTabelaBezerros() {
-        // Define o nome das colunas para Bezerros
-        String[] colunas = {"Nº Prov", "Mãe", "Pai", "Nascimento", "Sexo", "Saúde"};
-
+        String[] colunas = {"Nº Prov", "Mãe", "Pai", "Nascimento", "Sexo", "Saúde", "Vacinas"};
         DefaultTableModel modelo = new DefaultTableModel(colunas, 0);
         DateTimeFormatter formatoBR = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-        // Percorre o vetor de bezerros e preenche as linhas
+        if (!fazenda.temBezerrosCadastrados()) {
+            tabelaB.setModel(modelo);
+            return;
+        }
+
         for (Bezerro b : fazenda.getVetorBezerros()) {
             if (b != null && b.isRegistroAtivoBezerro()) {
                 Object[] linha = {
@@ -155,21 +291,19 @@ public class TelaPrincipal extends JFrame {
                         b.getNumPai(),
                         b.getDataNascimentoB().format(formatoBR),
                         b.getSexo(),
-                        b.getEstadoDeSaude()
+                        b.getEstadoDeSaude(),
+                        b.getVacinasFormatadas()
                 };
                 modelo.addRow(linha);
             }
         }
-
-        // Aplica os dados na tabela visual de bezerros
         tabelaB.setModel(modelo);
     }
 
     public static void main(String[] args) {
-        // Inicia a Interface Gráfica
         SwingUtilities.invokeLater(() -> {
             TelaPrincipal tela = new TelaPrincipal();
-            tela.setVisible(true); // Torna a janela visível
+            tela.setVisible(true);
         });
     }
 }

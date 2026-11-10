@@ -71,6 +71,12 @@
               <text value="Ordenar Plantel"/>
             </properties>
           </component>
+          <component id="a29af" class="javax.swing.JButton" binding="editarCampoButton" default-binding="true">
+            <constraints/>
+            <properties>
+              <text value="Editar Campo"/>
+            </properties>
+          </component>
           <component id="fb11" class="javax.swing.JButton" binding="removerAnimalButton" default-binding="true">
             <constraints/>
             <properties>

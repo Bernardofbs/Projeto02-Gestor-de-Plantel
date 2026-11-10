@@ -121,9 +121,16 @@ public class Vaca {
     }
 
     //adiciona setters para permitir edicao de dados
+
+    public void setNumBrinco(int numBrinco) {
+        this.numBrinco = numBrinco;
+    }
+
     public void setRaca(String raca) {
         this.raca = raca;
     }
+
+    public void setEstadoDeSaude(String estadoDeSaude) { this.estadoDeSaude = estadoDeSaude; }
 
     public void setProducaoMediaDia(double producaoMediaDia) {
         this.producaoMediaDia = producaoMediaDia;
