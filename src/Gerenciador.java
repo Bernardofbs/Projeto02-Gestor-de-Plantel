@@ -15,15 +15,41 @@ import java.util.Comparator;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
+import java.util.Arrays;
+
 public class Gerenciador {
 
+    // Correção Juliana 1. Inicializar os vetores como 0 (não-nulos) no construtor para evitar NullPointerException
+    //Declarei os vetores 'null' para serem instanciados e preenchidos com os dados do arquivo
     private Vaca[] vetorVacas;
     private Bezerro[] vetorBezerro;
-    //Declarei os vetores 'null' para serem instanciados e preenchidos com os dados do arquivo
+
+    //Construtor
+    public Gerenciador() {
+        this.vetorVacas = new Vaca[0];
+        this.vetorBezerro = new Bezerro[0];
+    }
 
 
     // ************************** MÉTODOS GERAIS DO SISTEMA **************************
 
+    // Correção Juliana 2: Verifica se há pelo menos uma vaca ativa cadastrada
+    public boolean temVacasCadastradas() {
+        if (vetorVacas == null || vetorVacas.length == 0) return false;
+        for (Vaca v : vetorVacas) {
+            if (v != null && v.isRegistroAtivoVaca()) return true;
+        }
+        return false;
+    }
+
+    // Correção Juliana 2: Verifica se há pelo menos um bezerro ativo cadastrado
+    public boolean temBezerrosCadastrados() {
+        if (vetorBezerro == null || vetorBezerro.length == 0) return false;
+        for (Bezerro b : vetorBezerro) {
+            if (b != null && b.isRegistroAtivoBezerro()) return true;
+        }
+        return false;
+    }
 
     public void lerArquivo(String arquivoPlantel) {
 
@@ -215,6 +241,28 @@ public class Gerenciador {
         System.out.println("----------------------\n");
     }
 
+    // Correção Juliana 3: Exibe um trecho (posição inicial até posição final) do vetor de vacas
+    public void listarTrechoVacas(int inicio, int fim) {
+        if (!temVacasCadastradas()) {
+            System.out.println("Não há vacas cadastradas no sistema.");
+            return;
+        }
+
+        if (inicio < 0 || fim >= vetorVacas.length || inicio > fim) {
+            System.out.println("Intervalo inválido! Informe posições entre 0 e " + (vetorVacas.length - 1));
+            return;
+        }
+
+        System.out.println("--- Exibindo trecho de vacas [" + inicio + " a " + fim + "] ---");
+        for (int i = inicio; i <= fim; i++) {
+            if (vetorVacas[i] != null && vetorVacas[i].isRegistroAtivoVaca()) {
+                System.out.println("Posição " + i + ": Brinco " + vetorVacas[i].getNumBrinco() +
+                        " | Raça: " + vetorVacas[i].getRaca() +
+                        " | Saúde: " + vetorVacas[i].getEstadoDeSaude());
+            }
+        }
+    }
+
     public void ordenarVacasPorBrinco() {
         //Ordena pelo número do brinco e leva indices vazios para o final
         Arrays.sort(this.vetorVacas, Comparator.nullsLast(Comparator.comparingInt(Vaca::getNumBrinco)));
@@ -325,6 +373,27 @@ public class Gerenciador {
         System.out.println("-------------------------\n");
     }
 
+    // Correção Juliana 3: Exibe um trecho (posição inicial até posição final) do vetor de bezerros
+    public void listarTrechoBezerros(int inicio, int fim) {
+        if (!temBezerrosCadastrados()) {
+            System.out.println("Não há bezerros cadastrados no sistema.");
+            return;
+        }
+
+        if (inicio < 0 || fim >= vetorBezerro.length || inicio > fim) {
+            System.out.println("Intervalo inválido! Informe posições entre 0 e " + (vetorBezerro.length - 1));
+            return;
+        }
+
+        System.out.println("--- Exibindo trecho de bezerros [" + inicio + " a " + fim + "] ---");
+        for (int i = inicio; i <= fim; i++) {
+            if (vetorBezerro[i] != null && vetorBezerro[i].isRegistroAtivoBezerro()) {
+                System.out.println("Posição " + i + ": Prov " + vetorBezerro[i].getNumProv() +
+                        " | Vacinas: " + vetorBezerro[i].getVacinasFormatadas());
+            }
+        }
+    }
+
     public void ordenarBezerrosPorNumeroProvisorio() {
         //Compara usando números int
         Arrays.sort(this.vetorBezerro, Comparator.nullsLast(Comparator.comparingInt(Bezerro::getNumProv)));
@@ -425,16 +494,22 @@ public class Gerenciador {
     // --- Adicionando os requisitos para o projeto final ---
 
     // 1. Inserir novos elementos (Aumenta o vetor dinamicamente). Antes só lia do arquivo
-    public void cadastrarNovaVaca(Vaca novaVaca) {
-        this.vetorVacas = Arrays.copyOf(this.vetorVacas, this.vetorVacas.length + 1);
-        this.vetorVacas[this.vetorVacas.length - 1] = novaVaca;
-        System.out.println("Nova Vaca cadastrada com sucesso");
+    //Correção Juliana 4: Garante que novos cadastros expandam o vetor dinamicamente sem gerar exceções se o vetor estiver vazio.
+    public void cadastrarNovaVaca(Vaca v) {
+        if (vetorVacas == null) {
+            vetorVacas = new Vaca[0];
+        }
+        vetorVacas = Arrays.copyOf(vetorVacas, vetorVacas.length + 1);
+        vetorVacas[vetorVacas.length - 1] = v;
     }
 
-    public void cadastrarNovoBezerro(Bezerro novoBezerro) {
-        this.vetorBezerro = Arrays.copyOf(this.vetorBezerro, this.vetorBezerro.length + 1);
-        this.vetorBezerro[this.vetorBezerro.length - 1] = novoBezerro;
-        System.out.println("Novo Bezerro cadastrado com sucesso");
+    //Correção Juliana 4: Garante que novos cadastros expandam o vetor dinamicamente sem gerar exceções se o vetor estiver vazio.
+    public void cadastrarNovoBezerro(Bezerro b) {
+        if (vetorBezerro == null) {
+            vetorBezerro = new Bezerro[0];
+        }
+        vetorBezerro = Arrays.copyOf(vetorBezerro, vetorBezerro.length + 1);
+        vetorBezerro[vetorBezerro.length - 1] = b;
     }
 
     // 2. Ordenar por dois campos distintos (Saúde e Produção de Leite, fazendo o desempate caso haja campos iguais)
@@ -477,12 +552,12 @@ public class Gerenciador {
     }
 
     //Puxar os animais para a tabela
+    //Correção Juliana 5: Retornam um vetor vazio (tamanho 0) em vez de null se não houver registros.
     public Vaca[] getVetorVacas() {
-        return vetorVacas;
+        return vetorVacas != null ? vetorVacas : new Vaca[0];
     }
 
     public Bezerro[] getVetorBezerros() {
-        return vetorBezerro;
+        return vetorBezerro != null ? vetorBezerro : new Bezerro[0];
     }
-
 }

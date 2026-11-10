@@ -134,4 +134,19 @@ public class Bezerro {
         this.sexo = sexo;
     }
 
+
+    //Correção 1: Adicionar método para editar a lista de vacinas
+    public String getVacinasFormatadas() {
+        if (contadorVacinas == 0 || listaVacinas == null) {
+            return "Nenhuma";
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < contadorVacinas; i++) {
+            if (listaVacinas[i] != null && !listaVacinas[i].trim().isEmpty()) {
+                if (sb.length() > 0) sb.append(", ");
+                sb.append(listaVacinas[i]);
+            }
+        }
+        return sb.length() > 0 ? sb.toString() : "Nenhuma";
+    }
 }
